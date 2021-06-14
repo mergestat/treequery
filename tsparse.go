@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 
 	"github.com/go-enry/go-enry/v2"
+	sitter "github.com/smacker/go-tree-sitter"
+	"github.com/smacker/go-tree-sitter/javascript"
 )
 
 func main() {
@@ -21,9 +23,17 @@ func main() {
 		fmt.Println("There was either an error in the command line input or a faulty filepath. Please try again.")
 		log.Fatal(err)
 	}
+
 	contents, _ := ioutil.ReadFile(absPath)
-	lang := enry.GetLanguage(absPath, []byte(contents))
+	contents = []byte(contents)
+	lang := enry.GetLanguage(absPath, contents)
 	fmt.Println("language: " + lang)
+
+	parser := sitter.NewParser()
+	parser.SetLanguage(javascript.GetLanguage())
+	tree := parser.Parse(nil, contents)
+	n := tree.RootNode()
+	fmt.Println(n)
 }
 
 func exists(path string) (bool, error) {
