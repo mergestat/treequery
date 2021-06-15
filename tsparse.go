@@ -1,16 +1,20 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/go-enry/go-enry/v2"
 	sitter "github.com/smacker/go-tree-sitter"
+	"github.com/smacker/go-tree-sitter/golang"
+	"github.com/smacker/go-tree-sitter/java"
 	"github.com/smacker/go-tree-sitter/javascript"
+	"github.com/smacker/go-tree-sitter/python"
 )
 
 func main() {
@@ -18,21 +22,31 @@ func main() {
 	path := flag.Arg(0)
 	absPath, _ := filepath.Abs(path)
 	fmt.Println("Path to file: " + absPath)
-	f, err := exists(absPath)
+	f, inputErr := exists(absPath)
 	if !f {
-		fmt.Println("There was either an error in the command line input or a faulty filepath. Please try again.")
-		log.Fatal(err)
+		handleErr(inputErr)
 	}
 
 	contents, _ := ioutil.ReadFile(absPath)
 	contents = []byte(contents)
 	lang := enry.GetLanguage(absPath, contents)
-	fmt.Println("language: " + lang)
-
 	parser := sitter.NewParser()
-	parser.SetLanguage(javascript.GetLanguage())
+	switch strings.ToLower(lang) {
+	case "javascript":
+		parser.SetLanguage(javascript.GetLanguage())
+	case "golang":
+		parser.SetLanguage(golang.GetLanguage())
+	case "python":
+		parser.SetLanguage(python.GetLanguage())
+	case "java":
+		parser.SetLanguage(java.GetLanguage())
+	default:
+		handleErr(errors.New("Language either not supported or couldn't properly be detected. Only JS, Go, Python, and Java are supported at this time."))
+	}
+
 	tree := parser.Parse(nil, contents)
 	n := tree.RootNode()
+	fmt.Println("language: " + lang)
 	fmt.Println(n)
 }
 
@@ -45,4 +59,11 @@ func exists(path string) (bool, error) {
 		return false, nil
 	}
 	return false, err
+}
+
+func handleErr(err error) {
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }
