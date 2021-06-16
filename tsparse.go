@@ -36,20 +36,7 @@ func main() {
 	if len(lang) <= 0 {
 		handleErr(errors.New("language could not be detected"))
 	}
-	parser := sitter.NewParser()
-	switch strings.ToLower(lang) {
-	case "javascript":
-		parser.SetLanguage(javascript.GetLanguage())
-	case "go":
-		parser.SetLanguage(golang.GetLanguage())
-	case "python":
-		parser.SetLanguage(python.GetLanguage())
-	case "java":
-		parser.SetLanguage(java.GetLanguage())
-	default:
-		handleErr(errors.New("language not supported at this time"))
-	}
-
+	parser := getTSParser(lang)
 	tree := parser.Parse(nil, contents)
 	n := tree.RootNode()
 	fmt.Println("language: " + lang)
@@ -72,4 +59,21 @@ func handleErr(err error) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+}
+
+func getTSParser(lang string) sitter.Parser {
+	parser := sitter.NewParser()
+	switch strings.ToLower(lang) {
+	case "javascript":
+		parser.SetLanguage(javascript.GetLanguage())
+	case "go":
+		parser.SetLanguage(golang.GetLanguage())
+	case "python":
+		parser.SetLanguage(python.GetLanguage())
+	case "java":
+		parser.SetLanguage(java.GetLanguage())
+	default:
+		handleErr(errors.New("language not supported at this time"))
+	}
+	return *parser
 }
