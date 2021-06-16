@@ -30,21 +30,24 @@ func main() {
 	contents, _ := ioutil.ReadFile(absPath)
 	contents = []byte(contents)
 	if len(contents) <= 0 {
-		handleErr(errors.New("Empty file given. Please query some code instead"))
+		handleErr(errors.New("empty or faulty file input"))
 	}
 	lang := enry.GetLanguage(absPath, contents)
+	if len(lang) <= 0 {
+		handleErr(errors.New("language could not be detected"))
+	}
 	parser := sitter.NewParser()
 	switch strings.ToLower(lang) {
 	case "javascript":
 		parser.SetLanguage(javascript.GetLanguage())
-	case "golang":
+	case "go":
 		parser.SetLanguage(golang.GetLanguage())
 	case "python":
 		parser.SetLanguage(python.GetLanguage())
 	case "java":
 		parser.SetLanguage(java.GetLanguage())
 	default:
-		handleErr(errors.New("Language either not supported or couldn't properly be detected. Only JS, Go, Python, and Java are supported at this time."))
+		handleErr(errors.New("language not supported at this time"))
 	}
 
 	tree := parser.Parse(nil, contents)
