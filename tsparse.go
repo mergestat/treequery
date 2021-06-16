@@ -29,6 +29,9 @@ func main() {
 
 	contents, _ := ioutil.ReadFile(absPath)
 	contents = []byte(contents)
+	if len(contents) <= 0 {
+		handleErr(errors.New("Empty file given. Please query some code instead"))
+	}
 	lang := enry.GetLanguage(absPath, contents)
 	parser := sitter.NewParser()
 	switch strings.ToLower(lang) {
