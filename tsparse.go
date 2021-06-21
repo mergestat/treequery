@@ -1,16 +1,21 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/go-enry/go-enry/v2"
 	sitter "github.com/smacker/go-tree-sitter"
+	"github.com/smacker/go-tree-sitter/golang"
+	"github.com/smacker/go-tree-sitter/java"
 	"github.com/smacker/go-tree-sitter/javascript"
+	"github.com/smacker/go-tree-sitter/python"
 )
 
 func main() {
@@ -33,9 +38,6 @@ func main() {
 	parser.SetLanguage(javascript.GetLanguage())
 	tree := parser.Parse(nil, contents)
 	n := tree.RootNode()
-<<<<<<< Updated upstream
-	fmt.Println(n)
-=======
 	fmt.Println("language: " + lang)
 	fmt.Println("AST:", n)
 
@@ -60,7 +62,6 @@ func main() {
 		}
 	}
 	fmt.Println(funcs)
->>>>>>> Stashed changes
 }
 
 func exists(path string) (bool, error) {
@@ -73,8 +74,6 @@ func exists(path string) (bool, error) {
 	}
 	return false, err
 }
-<<<<<<< Updated upstream
-=======
 
 func handleErr(err error) {
 	if err != nil {
@@ -111,4 +110,3 @@ func funcName(content []byte, n *sitter.Node) string {
 
 	return n.ChildByFieldName("name").Content(content)
 }
->>>>>>> Stashed changes
