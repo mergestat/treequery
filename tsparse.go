@@ -38,6 +38,8 @@ func main() {
 	parser.SetLanguage(javascript.GetLanguage())
 	tree := parser.Parse(nil, contents)
 	n := tree.RootNode()
+
+	fmt.Println(n)
 	fmt.Println("language: " + lang)
 	fmt.Println("AST:", n)
 
@@ -45,7 +47,7 @@ func main() {
 	fmt.Println("Root children:", n.ChildCount())
 
 	fmt.Println("\nFunctions in input:")
-	q, _ := sitter.NewQuery([]byte("(function_declaration) @func"), java.GetLanguage())
+	q, _ := sitter.NewQuery([]byte("(function_declaration) @func"), javascript.GetLanguage())
 	qc := sitter.NewQueryCursor()
 	qc.Exec(q, n)
 
@@ -61,7 +63,7 @@ func main() {
 			fmt.Println("-", funcName(contents, c.Node))
 		}
 	}
-	fmt.Println(funcs)
+	//fmt.Println(funcs)
 }
 
 func exists(path string) (bool, error) {
