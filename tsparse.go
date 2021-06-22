@@ -28,18 +28,20 @@ func main() {
 		fmt.Println("There was either an error in the command line input or a faulty filepath. Please try again.")
 		log.Fatal(err)
 	}
+	filename := filepath.Base(absPath)
 
 	contents, _ := ioutil.ReadFile(absPath)
-	contents = []byte(contents)
+	if len(contents) <= 0 {
+		handleErr(errors.New("empty or faulty file input"))
+	}
 	lang := enry.GetLanguage(absPath, contents)
-	fmt.Println("language: " + lang)
-
-	parser := sitter.NewParser()
-	parser.SetLanguage(javascript.GetLanguage())
+	if len(lang) <= 0 {
+		handleErr(errors.New("language could not be detected"))
+	}
+	parser, grammar := getTSParser(lang)
 	tree := parser.Parse(nil, contents)
 	n := tree.RootNode()
 
-	fmt.Println(n)
 	fmt.Println("language: " + lang)
 	fmt.Println("AST:", n)
 
@@ -47,7 +49,8 @@ func main() {
 	fmt.Println("Root children:", n.ChildCount())
 
 	fmt.Println("\nFunctions in input:")
-	q, _ := sitter.NewQuery([]byte("(function_declaration) @func"), javascript.GetLanguage())
+	q, errQuery := sitter.NewQuery([]byte("(method_declaration) @func"), &grammar)
+	handleErr(errQuery)
 	qc := sitter.NewQueryCursor()
 	qc.Exec(q, n)
 
@@ -60,10 +63,10 @@ func main() {
 
 		for _, c := range m.Captures {
 			funcs = append(funcs, c.Node)
-			fmt.Println("-", funcName(contents, c.Node))
+			fmt.Println("-", filename, ":", c.Node.StartPoint().Row, "-", c.Node.EndPoint().Row)
+			fmt.Println(c.Node.Content(contents))
 		}
 	}
-	//fmt.Println(funcs)
 }
 
 func exists(path string) (bool, error) {
@@ -84,29 +87,27 @@ func handleErr(err error) {
 	}
 }
 
-func getTSParser(lang string) sitter.Parser {
+func getTSParser(lang string) (sitter.Parser, sitter.Language) {
 	parser := sitter.NewParser()
+	grammar := new(sitter.Language)
 	switch strings.ToLower(lang) {
 	case "javascript":
-		parser.SetLanguage(javascript.GetLanguage())
+		grammar = javascript.GetLanguage()
 	case "go":
-		parser.SetLanguage(golang.GetLanguage())
+		grammar = golang.GetLanguage()
 	case "python":
-		parser.SetLanguage(python.GetLanguage())
+		grammar = python.GetLanguage()
 	case "java":
-		parser.SetLanguage(java.GetLanguage())
+		grammar = java.GetLanguage()
 	default:
 		handleErr(errors.New("language not supported at this time"))
 	}
-	return *parser
+	parser.SetLanguage(grammar)
+	return *parser, *grammar
 }
 
 func funcName(content []byte, n *sitter.Node) string {
 	if n == nil {
-		return ""
-	}
-
-	if n.Type() != "function_declaration" {
 		return ""
 	}
 
