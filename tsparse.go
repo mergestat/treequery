@@ -21,6 +21,7 @@ import (
 func main() {
 	flag.Parse()
 	path := flag.Arg(0)
+	query := flag.Arg(1)
 	absPath, _ := filepath.Abs(path)
 	fmt.Println("Path to file: " + absPath)
 	f, err := exists(absPath)
@@ -49,12 +50,12 @@ func main() {
 	fmt.Println("Root children:", n.ChildCount())
 
 	fmt.Println("\nFunctions in input:")
-	q, errQuery := sitter.NewQuery([]byte("(method_declaration) @func"), &grammar)
+	q, errQuery := sitter.NewQuery([]byte("("+query+")"+" @codeElements"), &grammar)
 	handleErr(errQuery)
 	qc := sitter.NewQueryCursor()
 	qc.Exec(q, n)
 
-	var funcs []*sitter.Node
+	var codeElements []*sitter.Node
 	for {
 		m, ok := qc.NextMatch()
 		if !ok {
@@ -62,7 +63,7 @@ func main() {
 		}
 
 		for _, c := range m.Captures {
-			funcs = append(funcs, c.Node)
+			codeElements = append(codeElements, c.Node)
 			fmt.Println("-", filename, ":", c.Node.StartPoint().Row, "-", c.Node.EndPoint().Row)
 			fmt.Println(c.Node.Content(contents))
 		}
