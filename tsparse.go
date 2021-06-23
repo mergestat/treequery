@@ -8,7 +8,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 
 	"github.com/go-enry/go-enry/v2"
 	sitter "github.com/smacker/go-tree-sitter"
@@ -88,14 +87,14 @@ func handleErr(err error) {
 func getTSParser(lang string) (sitter.Parser, sitter.Language) {
 	parser := sitter.NewParser()
 	grammar := new(sitter.Language)
-	switch strings.ToLower(lang) {
-	case "javascript":
+	switch lang {
+	case "Javascript":
 		grammar = javascript.GetLanguage()
-	case "go":
+	case "Go":
 		grammar = golang.GetLanguage()
-	case "python":
+	case "Python":
 		grammar = python.GetLanguage()
-	case "java":
+	case "Java":
 		grammar = java.GetLanguage()
 	default:
 		handleErr(errors.New("language not supported at this time"))
