@@ -5,9 +5,9 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/go-enry/go-enry/v2"
@@ -23,12 +23,10 @@ func main() {
 	path := flag.Arg(0)
 	absPath, _ := filepath.Abs(path)
 	fmt.Println("Path to file: " + absPath)
-	f, err := exists(absPath)
+	f, _ := exists(absPath)
 	if !f {
-		fmt.Println("There was either an error in the command line input or a faulty filepath. Please try again.")
-		log.Fatal(err)
+		handleErr(errors.New("there was either an error in the command line input or a faulty filepath"))
 	}
-	filename := filepath.Base(absPath)
 
 	contents, _ := ioutil.ReadFile(absPath)
 	if len(contents) <= 0 {
@@ -63,7 +61,7 @@ func main() {
 
 		for _, c := range m.Captures {
 			funcs = append(funcs, c.Node)
-			fmt.Println("-", filename, ":", c.Node.StartPoint().Row, "-", c.Node.EndPoint().Row)
+			fmt.Println("-", absPath+":"+strconv.FormatUint(uint64(c.Node.StartPoint().Row), 10), "-", c.Node.EndPoint().Row)
 			fmt.Println(c.Node.Content(contents))
 		}
 	}
