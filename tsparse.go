@@ -86,7 +86,7 @@ func handleErr(err error) {
 
 func getTSParser(lang string) (sitter.Parser, sitter.Language) {
 	parser := sitter.NewParser()
-	grammar := new(sitter.Language)
+	var grammar sitter.Language
 	switch lang {
 	case "Javascript":
 		grammar = javascript.GetLanguage()
