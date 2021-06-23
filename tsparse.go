@@ -50,7 +50,7 @@ func main() {
 	fmt.Println("Root children:", n.ChildCount())
 
 	fmt.Println("\nFunctions in input:")
-	q, errQuery := sitter.NewQuery([]byte("("+query+")"+" @codeElements"), &grammar)
+	q, errQuery := sitter.NewQuery([]byte(query), &grammar)
 	handleErr(errQuery)
 	qc := sitter.NewQueryCursor()
 	qc.Exec(q, n)
