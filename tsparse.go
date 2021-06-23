@@ -27,11 +27,10 @@ func main() {
 		handleErr(errors.New("there was either an error in the command line input or a faulty filepath"))
 	}
 
-	contents, _ := ioutil.ReadFile(absPath)
-	if len(contents) <= 0 {
-		handleErr(errors.New("empty or faulty file input"))
-	}
+	contents, readErr := ioutil.ReadFile(absPath)
+	handleErr(readErr)
 	lang := enry.GetLanguage(absPath, contents)
+	fmt.Println("language: " + lang)
 	if lang == "" {
 		handleErr(errors.New("language could not be detected"))
 	}
@@ -39,7 +38,6 @@ func main() {
 	tree := parser.Parse(nil, contents)
 	n := tree.RootNode()
 
-	fmt.Println("language: " + lang)
 	fmt.Println("AST:", n)
 
 	fmt.Println("Root type:", n.Type())
@@ -88,7 +86,7 @@ func getTSParser(lang string) (sitter.Parser, sitter.Language) {
 	parser := sitter.NewParser()
 	grammar := new(sitter.Language)
 	switch lang {
-	case "Javascript":
+	case "JavaScript":
 		grammar = javascript.GetLanguage()
 	case "Go":
 		grammar = golang.GetLanguage()
