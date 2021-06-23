@@ -32,7 +32,7 @@ func main() {
 		handleErr(errors.New("empty or faulty file input"))
 	}
 	lang := enry.GetLanguage(absPath, contents)
-	if len(lang) <= 0 {
+	if lang == "" {
 		handleErr(errors.New("language could not be detected"))
 	}
 	parser, grammar := getTSParser(lang)
