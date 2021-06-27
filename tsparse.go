@@ -87,7 +87,9 @@ func main() {
 	}
 
 	q, err := sitter.NewQuery([]byte(query), language)
-	handleErr(err)
+	if err != nil {
+		handleErr(fmt.Errorf("problem with query: %w", err))
+	}
 
 	qc := sitter.NewQueryCursor()
 	qc.Exec(q, n)
