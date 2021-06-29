@@ -1,4 +1,4 @@
-module github.com/askgitdev/tsparse
+module github.com/askgitdev/treequery
 
 go 1.16
 
