@@ -10,11 +10,16 @@ import (
 
 	"github.com/go-enry/go-enry/v2"
 	sitter "github.com/smacker/go-tree-sitter"
-	"github.com/smacker/go-tree-sitter/golang"
-	"github.com/smacker/go-tree-sitter/java"
-	"github.com/smacker/go-tree-sitter/javascript"
-	"github.com/smacker/go-tree-sitter/python"
 )
+
+var (
+	noFileNames bool
+)
+
+func init() {
+	flag.BoolVar(&noFileNames, "q", false, `"quiet" excludes file names from output`)
+	flag.Parse()
+}
 
 func handleErr(err error) {
 	if err != nil {
@@ -23,47 +28,12 @@ func handleErr(err error) {
 	}
 }
 
-func fileExists(path string) (bool, error) {
-	_, err := os.Stat(path)
-	if err == nil {
-		return true, nil
-	}
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	return false, err
-}
-
-// getTSLanguageFromEnry retrieves the tree sitter language from a language name string (defined by the enry package)
-func getTSLanguageFromEnry(lang string) *sitter.Language {
-	switch lang {
-	case "JavaScript":
-		return javascript.GetLanguage()
-	case "Go":
-		return golang.GetLanguage()
-	case "Python":
-		return python.GetLanguage()
-	case "Java":
-		return java.GetLanguage()
-	default:
-		return nil
-	}
-}
-
 func main() {
-	flag.Parse()
 	path := flag.Arg(0)
 	query := flag.Arg(1)
 
 	absPath, err := filepath.Abs(path)
 	handleErr(err)
-
-	f, err := fileExists(absPath)
-	handleErr(err)
-
-	if !f {
-		handleErr(errors.New("file does not exist"))
-	}
 
 	contents, err := ioutil.ReadFile(absPath)
 	handleErr(err)
@@ -90,8 +60,11 @@ func main() {
 	if err != nil {
 		handleErr(fmt.Errorf("problem with query: %w", err))
 	}
+	defer q.Close()
 
 	qc := sitter.NewQueryCursor()
+	defer qc.Close()
+
 	qc.Exec(q, n)
 
 	for {
@@ -100,8 +73,11 @@ func main() {
 			break
 		}
 
+		// fmt.Println(q.CaptureNameForId(m.ID))
 		for _, c := range m.Captures {
-			fmt.Println(absPath + ":" + fmt.Sprintf("%d", c.Node.StartPoint().Row+1))
+			if !noFileNames {
+				fmt.Printf("%s:%d:%d\n", absPath, c.Node.StartPoint().Row+1, c.Node.StartPoint().Column+1)
+			}
 			fmt.Println(c.Node.Content(contents))
 		}
 	}
