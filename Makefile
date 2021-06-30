@@ -1,4 +1,4 @@
-.PHONY: all clean
+.PHONY: all clean test vet
 
 all: clean tq
 
@@ -7,3 +7,9 @@ clean:
 
 tq:
 	go build -o $@ .
+
+test:
+	go test -v ./...
+
+vet:
+	go vet -v ./...
