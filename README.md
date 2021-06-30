@@ -32,3 +32,27 @@ addEdge
 removeEdge
 getEstimate
 ```
+
+### Supported Languages
+
+- [ ] bash
+- [ ] c
+- [ ] cpp
+- [ ] csharp
+- [ ] css
+- [ ] elm
+- [x] golang
+- [ ] html
+- [x] java
+- [x] javascript
+- [ ] lua
+- [ ] ocaml
+- [ ] php
+- [x] python
+- [x] ruby
+- [ ] rust
+- [ ] scala
+- [ ] svelte
+- [ ] toml
+- [ ] typescript
+- [ ] yaml

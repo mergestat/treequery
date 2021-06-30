@@ -6,19 +6,22 @@ import (
 	"github.com/smacker/go-tree-sitter/java"
 	"github.com/smacker/go-tree-sitter/javascript"
 	"github.com/smacker/go-tree-sitter/python"
+	"github.com/smacker/go-tree-sitter/ruby"
 )
 
 // getTSLanguageFromEnry retrieves the tree sitter language from a language name string (defined by the enry package)
 func getTSLanguageFromEnry(lang string) *sitter.Language {
 	switch lang {
-	case "JavaScript":
-		return javascript.GetLanguage()
 	case "Go":
 		return golang.GetLanguage()
-	case "Python":
-		return python.GetLanguage()
 	case "Java":
 		return java.GetLanguage()
+	case "JavaScript":
+		return javascript.GetLanguage()
+	case "Python":
+		return python.GetLanguage()
+	case "Ruby":
+		return ruby.GetLanguage()
 	default:
 		return nil
 	}
