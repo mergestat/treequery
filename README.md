@@ -9,10 +9,16 @@ The default output includes a list of line number locations where there's a quer
 
 ### Getting Started
 
-Running `make` in the root of this repo will produce a `tq` binary, which can be used as such:
+Install with homebrew:
+```
+brew tap askgitdev/treequery
+brew install treequery
+```
+
+Or by running `make` in the root of this repo, which will produce a `tq` binary.
 
 ```
-> ./tq testdata/TriestBase.java "(method_declaration name: (identifier) @method_name)"
+> tq testdata/TriestBase.java "(method_declaration name: (identifier) @method_name)"
 ./treequery/testdata/TriestBase.java:20
 handleEdge
 ./treequery/testdata/TriestBase.java:48
