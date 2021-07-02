@@ -17,7 +17,7 @@ var (
 )
 
 func init() {
-	flag.BoolVar(&noFileNames, "q", false, `"quiet" excludes file names from output`)
+	flag.BoolVar(&noFileNames, "q", false, `"quiet" mode excludes file names from output`)
 	flag.Parse()
 }
 
@@ -44,6 +44,10 @@ func main() {
 	}
 
 	language := getTSLanguageFromEnry(lang)
+	if language == nil {
+		handleErr(fmt.Errorf("no parser for: %s", lang))
+	}
+
 	parser := sitter.NewParser()
 	parser.SetLanguage(language)
 
