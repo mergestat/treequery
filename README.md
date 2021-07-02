@@ -1,3 +1,6 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/askgitdev/treequery)](https://goreportcard.com/report/github.com/askgitdev/treequery)
+[![BuildStatus](https://github.com/askgitdev/askgit/workflows/tests/badge.svg)](https://github.com/askgitdev/askgit/actions?workflow=ci)
+
 ## treequery
 
 `treequery` is a CLI for executing [Tree-sitter queries](https://tree-sitter.github.io/tree-sitter/using-parsers#query-syntax) on source code files.
