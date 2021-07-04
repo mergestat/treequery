@@ -1,0 +1,34 @@
+name: ci
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+jobs:
+  build:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Set up Go 1.16
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.16.3
+      id: go
+
+    - name: Check out source
+      uses: actions/checkout@v1
+
+    - name: Vet
+      run: make vet
+    
+    - name: Test
+      run: make test
+  golangci:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
