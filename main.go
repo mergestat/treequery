@@ -14,10 +14,14 @@ import (
 
 var (
 	noFileNames bool
+	queryFile   string
+	lang        string
 )
 
 func init() {
 	flag.BoolVar(&noFileNames, "q", false, `"quiet" mode excludes file names from output`)
+	flag.StringVar(&queryFile, "f", "", "query can be extracted from filepath")
+	flag.StringVar(&lang, "lang", "", "language can be given by user")
 	flag.Parse()
 }
 
@@ -30,7 +34,14 @@ func handleErr(err error) {
 
 func main() {
 	path := flag.Arg(0)
-	query := flag.Arg(1)
+	var query string
+	if len(queryFile) == 0 {
+		query = flag.Arg(1)
+	} else {
+		queryContent, err := ioutil.ReadFile(queryFile)
+		handleErr(err)
+		query = string(queryContent)
+	}
 
 	absPath, err := filepath.Abs(path)
 	handleErr(err)
@@ -38,7 +49,9 @@ func main() {
 	contents, err := ioutil.ReadFile(absPath)
 	handleErr(err)
 
-	lang := enry.GetLanguage(absPath, contents)
+	if len(lang) == 0 {
+		lang = enry.GetLanguage(absPath, contents)
+	}
 	if lang == "" {
 		handleErr(errors.New("language could not be detected"))
 	}
