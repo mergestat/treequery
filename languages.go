@@ -19,7 +19,8 @@ import (
 	"github.com/smacker/go-tree-sitter/ruby"
 	"github.com/smacker/go-tree-sitter/rust"
 	"github.com/smacker/go-tree-sitter/scala"
-	"github.com/smacker/go-tree-sitter/svelte"
+
+	//"github.com/smacker/go-tree-sitter/svelte"
 	"github.com/smacker/go-tree-sitter/toml"
 	"github.com/smacker/go-tree-sitter/typescript/typescript"
 	"github.com/smacker/go-tree-sitter/yaml"
@@ -62,8 +63,8 @@ func getTSLanguageFromEnry(lang string) *sitter.Language {
 		return rust.GetLanguage()
 	case "Scala":
 		return scala.GetLanguage()
-	case "Svelte":
-		return svelte.GetLanguage()
+	//case "Svelte":
+	//return svelte.GetLanguage()
 	case "TOML":
 		return toml.GetLanguage()
 	case "TypeScript":
