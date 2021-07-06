@@ -1,7 +1,6 @@
 package main
 
 import (
-	//"html"
 	sitter "github.com/smacker/go-tree-sitter"
 	"github.com/smacker/go-tree-sitter/bash"
 	"github.com/smacker/go-tree-sitter/c"
