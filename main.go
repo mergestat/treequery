@@ -92,10 +92,12 @@ func main() {
 
 		// fmt.Println(q.CaptureNameForId(m.ID))
 		for _, c := range m.Captures {
-			if !noFileNames {
-				fmt.Printf("%s:%d:%d\n", absPath, c.Node.StartPoint().Row+1, c.Node.StartPoint().Column+1)
+			if q.CaptureNameForId(c.Index) == flag.Arg(1) {
+				if !noFileNames {
+					fmt.Printf("%s:%d:%d\n", absPath, c.Node.StartPoint().Row+1, c.Node.StartPoint().Column+1)
+				}
+				fmt.Println(c.Node.Content(contents))
 			}
-			fmt.Println(c.Node.Content(contents))
 		}
 	}
 }
