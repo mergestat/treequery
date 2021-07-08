@@ -45,24 +45,24 @@ getEstimate
 
 ### Supported Languages
 
-- [ ] bash
-- [ ] c
-- [ ] cpp
-- [ ] csharp
-- [ ] css
-- [ ] elm
+- [x] bash
+- [x] c
+- [x] cpp
+- [x] csharp
+- [x] css
+- [x] elm
 - [x] golang
-- [ ] html
+- [x] html
 - [x] java
 - [x] javascript
-- [ ] lua
-- [ ] ocaml
-- [ ] php
+- [x] lua
+- [x] ocaml
+- [x] php
 - [x] python
 - [x] ruby
-- [ ] rust
-- [ ] scala
+- [x] rust
+- [x] scala
 - [ ] svelte
-- [ ] toml
-- [ ] typescript
-- [ ] yaml
+- [x] toml
+- [x] typescript
+- [x] yaml
