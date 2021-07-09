@@ -34,15 +34,6 @@ func handleErr(err error) {
 
 func main() {
 	path := flag.Arg(0)
-	var query string
-	if len(queryFile) == 0 {
-		query = flag.Arg(1)
-	} else {
-		queryContent, err := ioutil.ReadFile(queryFile)
-		handleErr(err)
-		query = string(queryContent)
-	}
-
 	absPath, err := filepath.Abs(path)
 	handleErr(err)
 
@@ -56,7 +47,14 @@ func main() {
 		handleErr(errors.New("language could not be detected"))
 	}
 
-	language := getTSLanguageFromEnry(lang)
+	language, query := getTSLanguageFromEnry(lang)
+	if len(queryFile) != 0 {
+		queryContent, err := ioutil.ReadFile(queryFile)
+		handleErr(err)
+		query = string(queryContent)
+	}
+	fmt.Println(query)
+
 	if language == nil {
 		handleErr(fmt.Errorf("no parser for: %s", lang))
 	}
