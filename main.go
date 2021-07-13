@@ -32,8 +32,7 @@ func handleErr(err error) {
 	}
 }
 
-func main() {
-	path := flag.Arg(0)
+func treequery(path string, queryName string) {
 	absPath, err := filepath.Abs(path)
 	handleErr(err)
 
@@ -90,12 +89,35 @@ func main() {
 
 		// fmt.Println(q.CaptureNameForId(m.ID))
 		for _, c := range m.Captures {
-			if q.CaptureNameForId(c.Index) == flag.Arg(1) {
+			if q.CaptureNameForId(c.Index) == queryName {
 				if !noFileNames {
 					fmt.Printf("%s:%d:%d\n", absPath, c.Node.StartPoint().Row+1, c.Node.StartPoint().Column+1)
 				}
 				fmt.Println(c.Node.Content(contents))
 			}
 		}
+	}
+}
+
+func main() {
+	path := flag.Arg(0)
+	queryName := flag.Arg(1)
+
+	pathInfo, err := os.Stat(path)
+	handleErr(err)
+
+	if pathInfo.IsDir() {
+		entries, err := os.ReadDir(path)
+		handleErr(err)
+		for _, entry := range entries {
+			if !entry.IsDir() {
+				file := path + "/" + entry.Name()
+				treequery(file, queryName)
+			} else {
+				fmt.Println("directory found")
+			}
+		}
+	} else {
+		treequery(path, queryName)
 	}
 }
