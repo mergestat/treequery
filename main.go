@@ -107,17 +107,26 @@ func main() {
 	handleErr(err)
 
 	if pathInfo.IsDir() {
-		entries, err := os.ReadDir(path)
-		handleErr(err)
-		for _, entry := range entries {
-			if !entry.IsDir() {
-				file := path + "/" + entry.Name()
-				treequery(file, queryName)
-			} else {
-				fmt.Println("directory found")
-			}
+		DirFilePaths := parseDir(path)
+		for _, filePath := range DirFilePaths {
+			//treequery(filePath, queryName)
+			fmt.Println(filePath)
 		}
 	} else {
 		treequery(path, queryName)
 	}
+}
+
+func parseDir(path string) []string {
+	var dirPaths []string
+	entries, err := os.ReadDir(path)
+	handleErr(err)
+	for _, entry := range entries {
+		if entry.IsDir() {
+			dirPaths = append(dirPaths, parseDir(path+"/"+entry.Name())...)
+		} else {
+			dirPaths = append(dirPaths, path+"/"+entry.Name())
+		}
+	}
+	return dirPaths
 }

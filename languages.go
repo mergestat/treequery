@@ -29,13 +29,12 @@ import (
 )
 
 var (
-	shellQuery string
-	cQuery     string
-	cppQuery   string
-	chashQuery string
-	cssQuery   string
-	elmQuery   string
-	//go:embed go.scm
+	shellQuery      string
+	cQuery          string
+	cppQuery        string
+	chashQuery      string
+	cssQuery        string
+	elmQuery        string
 	goQuery         string
 	htmlQuery       string
 	javaQuery       string
