@@ -1,6 +1,9 @@
 package main
 
 import (
+	"embed"
+	"path"
+
 	sitter "github.com/smacker/go-tree-sitter"
 	"github.com/smacker/go-tree-sitter/bash"
 	"github.com/smacker/go-tree-sitter/c"
@@ -26,52 +29,63 @@ import (
 	"github.com/smacker/go-tree-sitter/yaml"
 )
 
+//go:embed queries
+var f embed.FS
+
 // getTSLanguageFromEnry retrieves the tree sitter language from a language name string (defined by the enry package)
-func getTSLanguageFromEnry(lang string) *sitter.Language {
+func getTSLanguageFromEnry(lang string) (*sitter.Language, string, error) {
+	var tsLang *sitter.Language
 	switch lang {
 	case "Shell":
-		return bash.GetLanguage()
+		tsLang = bash.GetLanguage()
 	case "C":
-		return c.GetLanguage()
+		tsLang = c.GetLanguage()
 	case "C++":
-		return cpp.GetLanguage()
+		tsLang = cpp.GetLanguage()
 	case "C#":
-		return csharp.GetLanguage()
+		tsLang = csharp.GetLanguage()
 	case "CSS":
-		return css.GetLanguage()
+		tsLang = css.GetLanguage()
 	case "Elm":
-		return elm.GetLanguage()
+		tsLang = elm.GetLanguage()
 	case "Go":
-		return golang.GetLanguage()
+		tsLang = golang.GetLanguage()
 	case "HTML":
-		return html.GetLanguage()
+		tsLang = html.GetLanguage()
 	case "Java":
-		return java.GetLanguage()
+		tsLang = java.GetLanguage()
 	case "JavaScript":
-		return javascript.GetLanguage()
+		tsLang = javascript.GetLanguage()
 	case "Lua":
-		return lua.GetLanguage()
+		tsLang = lua.GetLanguage()
 	case "OCaml":
-		return ocaml.GetLanguage()
+		tsLang = ocaml.GetLanguage()
 	case "Python":
-		return python.GetLanguage()
+		tsLang = python.GetLanguage()
 	case "PHP":
-		return php.GetLanguage()
+		tsLang = php.GetLanguage()
 	case "Ruby":
-		return ruby.GetLanguage()
+		tsLang = ruby.GetLanguage()
 	case "Rust":
-		return rust.GetLanguage()
+		tsLang = rust.GetLanguage()
 	case "Scala":
-		return scala.GetLanguage()
+		tsLang = scala.GetLanguage()
 	//case "Svelte":
 	//return svelte.GetLanguage()
 	case "TOML":
-		return toml.GetLanguage()
+		tsLang = toml.GetLanguage()
 	case "TypeScript":
-		return typescript.GetLanguage()
+		tsLang = typescript.GetLanguage()
 	case "YAML":
-		return yaml.GetLanguage()
+		tsLang = yaml.GetLanguage()
 	default:
-		return nil
+		return nil, "", ErrLangNotSupported
 	}
+
+	query, err := f.ReadFile(path.Join("queries", lang, "main.scm"))
+	if err != nil {
+		return tsLang, "", err
+	}
+
+	return tsLang, string(query), nil
 }
