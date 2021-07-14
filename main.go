@@ -4,9 +4,11 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io/fs"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/go-enry/go-enry/v2"
 	sitter "github.com/smacker/go-tree-sitter"
@@ -15,13 +17,18 @@ import (
 var (
 	noFileNames bool
 	queryFile   string
-	lang        string
+	langFlag    string
+)
+
+var (
+	ErrLangNotDetected  = errors.New("could not detect language")
+	ErrLangNotSupported = errors.New("language is not supported")
 )
 
 func init() {
 	flag.BoolVar(&noFileNames, "q", false, `"quiet" mode excludes file names from output`)
 	flag.StringVar(&queryFile, "f", "", "query can be extracted from filepath")
-	flag.StringVar(&lang, "lang", "", "language can be given by user")
+	flag.StringVar(&langFlag, "l", "", "language can be given by user")
 	flag.Parse()
 }
 
@@ -32,30 +39,46 @@ func handleErr(err error) {
 	}
 }
 
-func treequery(path string, queryName string) {
+// printForFile prints output to stdout for a single file
+func printForFile(path, captureName string) error {
+	// this will handle relative paths as well (joins with cwd)
 	absPath, err := filepath.Abs(path)
-	handleErr(err)
+	if err != nil {
+		return err
+	}
 
 	contents, err := ioutil.ReadFile(absPath)
-	handleErr(err)
+	if err != nil {
+		return err
+	}
 
-	if len(lang) == 0 {
+	var lang string
+	if langFlag != "" {
+		lang = langFlag
+	} else {
 		lang = enry.GetLanguage(absPath, contents)
-	}
-	if lang == "" {
-		handleErr(errors.New("language could not be detected"))
+		if lang == "" {
+			return ErrLangNotDetected
+		}
 	}
 
-	language, query := getTSLanguageFromEnry(lang)
-	if len(queryFile) != 0 {
-		queryContent, err := ioutil.ReadFile(queryFile)
-		handleErr(err)
+	language, query, err := getTSLanguageFromEnry(lang)
+	if err != nil {
+		if !errors.Is(err, fs.ErrNotExist) {
+			return err
+		}
+	}
+
+	if queryFile != "" {
+		queryFilePath, err := filepath.Abs(queryFile)
+		if err != nil {
+			return err
+		}
+		queryContent, err := ioutil.ReadFile(queryFilePath)
+		if err != nil {
+			return err
+		}
 		query = string(queryContent)
-	}
-	fmt.Println(query)
-
-	if language == nil {
-		handleErr(fmt.Errorf("no parser for: %s", lang))
 	}
 
 	parser := sitter.NewParser()
@@ -64,15 +87,9 @@ func treequery(path string, queryName string) {
 	tree := parser.Parse(nil, contents)
 	n := tree.RootNode()
 
-	if query == "" {
-		// fmt.Println(absPath)
-		// fmt.Println(n.Content(contents))
-		fmt.Println(n)
-	}
-
 	q, err := sitter.NewQuery([]byte(query), language)
 	if err != nil {
-		handleErr(fmt.Errorf("problem with query: %w", err))
+		return fmt.Errorf("problem with query: %w", err)
 	}
 	defer q.Close()
 
@@ -89,7 +106,7 @@ func treequery(path string, queryName string) {
 
 		// fmt.Println(q.CaptureNameForId(m.ID))
 		for _, c := range m.Captures {
-			if q.CaptureNameForId(c.Index) == queryName {
+			if q.CaptureNameForId(c.Index) == captureName {
 				if !noFileNames {
 					fmt.Printf("%s:%d:%d\n", absPath, c.Node.StartPoint().Row+1, c.Node.StartPoint().Column+1)
 				}
@@ -97,36 +114,45 @@ func treequery(path string, queryName string) {
 			}
 		}
 	}
+
+	return nil
 }
 
 func main() {
-	path := flag.Arg(0)
-	queryName := flag.Arg(1)
+	var path string
+	var captureName string
 
-	pathInfo, err := os.Stat(path)
+	switch flag.NArg() {
+	case 0:
+		handleErr(fmt.Errorf("must supply a query capture"))
+	case 1:
+		path = "."
+		captureName = flag.Arg(0)
+	case 2:
+		path = flag.Arg(0)
+		captureName = flag.Arg(1)
+	}
+
+	absPath, err := filepath.Abs(path)
 	handleErr(err)
 
-	if pathInfo.IsDir() {
-		DirFilePaths := parseDir(path)
-		for _, filePath := range DirFilePaths {
-			//treequery(filePath, queryName)
-			fmt.Println(filePath)
+	err = filepath.WalkDir(absPath, func(path string, d fs.DirEntry, err error) error {
+		// skip hidden directories
+		// TODO skip paths specified in .gitignore too?
+		if d.IsDir() && strings.HasPrefix(d.Name(), ".") {
+			return fs.SkipDir
 		}
-	} else {
-		treequery(path, queryName)
-	}
-}
 
-func parseDir(path string) []string {
-	var dirPaths []string
-	entries, err := os.ReadDir(path)
-	handleErr(err)
-	for _, entry := range entries {
-		if entry.IsDir() {
-			dirPaths = append(dirPaths, parseDir(path+"/"+entry.Name())...)
-		} else {
-			dirPaths = append(dirPaths, path+"/"+entry.Name())
+		if !d.IsDir() {
+			err := printForFile(path, captureName)
+			if err != nil {
+				if errors.Is(err, ErrLangNotDetected) || errors.Is(err, ErrLangNotSupported) {
+					return nil
+				}
+				return err
+			}
 		}
-	}
-	return dirPaths
+		return nil
+	})
+	handleErr(err)
 }
