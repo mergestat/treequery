@@ -18,6 +18,7 @@ var (
 	noFileNames bool
 	queryFile   string
 	langFlag    string
+	ignoreFlag  string
 )
 
 var (
@@ -29,6 +30,7 @@ func init() {
 	flag.BoolVar(&noFileNames, "q", false, `"quiet" mode excludes file names from output`)
 	flag.StringVar(&queryFile, "f", "", "query can be extracted from filepath")
 	flag.StringVar(&langFlag, "l", "", "language can be given by user")
+	flag.StringVar(&ignoreFlag, "i", "", "ignore certain files in directory")
 	flag.Parse()
 }
 
@@ -141,6 +143,13 @@ func main() {
 		// TODO skip paths specified in .gitignore too?
 		if d.IsDir() && strings.HasPrefix(d.Name(), ".") {
 			return fs.SkipDir
+		}
+
+		//skip files specified in ignore flag
+		match, pattErr := filepath.Match(ignoreFlag, d.Name())
+		handleErr(pattErr)
+		if match {
+			return nil
 		}
 
 		if !d.IsDir() {
